@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Drop Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="brand-header">
+            <img class="cw-logo-horizontal" src="img/cw_logo-horizontal.png" alt="charity: water logo">
+            <h1 class="game-title">Conserve Clean Water</h1>
+        </div>
+        <p class="game-tagline">Catch the clean drops, avoid the dirty ones!</p>
+        <div class="score-panel">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="timer">Time: <span id="time">30</span>s</div>
+            <button id="start-btn">Start Game</button>
+            <button id="reset-btn" type="button">Reset</button>
+        </div>
+        <p id="status-message" aria-live="polite"></p>
+        
+        <div id="game-container">
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
