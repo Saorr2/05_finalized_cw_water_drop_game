@@ -5,7 +5,22 @@ let gameTimer;
 let score = 0;
 let timeLeft = 30;
 let lastDropSize = null;
-const WINNING_SCORE = 20;
+let WINNING_SCORE = 20;
+let OBSTACLE_CHANCE = 0.15;
+let BAD_DROP_CHANCE = 0.2;
+let DROP_INTERVAL = 700;
+let GAME_DURATION = 30;
+let MAX_LIVES = 3;
+let livesLeft = 3;
+
+// Difficulty settings
+const difficultySettings = {
+  easy: { winningScore: 10, obstacleChance: 0.1, badDropChance: 0.15, dropInterval: 1000, gameDuration: 40, maxLives: 4 },
+  normal: { winningScore: 20, obstacleChance: 0.15, badDropChance: 0.2, dropInterval: 700, gameDuration: 30, maxLives: 3 },
+  hard: { winningScore: 30, obstacleChance: 0.25, badDropChance: 0.3, dropInterval: 500, gameDuration: 20, maxLives: 2 }
+};
+
+let currentDifficulty = "normal";
 
 const winningMessages = [
   "Amazing work! You helped protect clean water.",
@@ -23,20 +38,70 @@ const losingMessages = [
 
 const startButton = document.getElementById("start-btn");
 const resetButton = document.getElementById("reset-btn");
+const difficultySelector = document.getElementById("difficulty");
 const gameContainer = document.getElementById("game-container");
 const scoreElement = document.getElementById("score");
 const timeElement = document.getElementById("time");
+const livesContainer = document.getElementById("lives-container");
 const statusMessage = document.getElementById("status-message");
 
-const OBSTACLE_CHANCE = 0.15;
-const BAD_DROP_CHANCE = 0.2;
 const FAST_PHASE_THRESHOLD = 10;
 const FAST_FALL_MULTIPLIER = 0.65;
 const CONFETTI_COLORS = ["#FFC907", "#2E9DF7", "#8BD1CB", "#4FCB53", "#FF902A"];
 
+// Update game settings based on selected difficulty
+function updateDifficultySettings() {
+  const settings = difficultySettings[currentDifficulty];
+  WINNING_SCORE = settings.winningScore;
+  OBSTACLE_CHANCE = settings.obstacleChance;
+  BAD_DROP_CHANCE = settings.badDropChance;
+  DROP_INTERVAL = settings.dropInterval;
+  GAME_DURATION = settings.gameDuration;
+  MAX_LIVES = settings.maxLives;
+}
+
+function renderLives() {
+  livesContainer.innerHTML = "";
+  for (let i = 0; i < livesLeft; i += 1) {
+    const lifeDrop = document.createElement("span");
+    lifeDrop.className = "life-drop";
+    lifeDrop.setAttribute("aria-hidden", "true");
+    livesContainer.appendChild(lifeDrop);
+  }
+}
+
+function removeOneLife() {
+  const lastLife = livesContainer.lastElementChild;
+  if (lastLife) {
+    lastLife.classList.add("life-drop-lost");
+    setTimeout(() => {
+      lastLife.remove();
+    }, 160);
+  }
+}
+
+function loseLife(reason) {
+  if (!gameRunning || livesLeft <= 0) return;
+
+  livesLeft -= 1;
+  removeOneLife();
+
+  if (livesLeft <= 0) {
+    endGame(reason || "Water reserve depleted.");
+  }
+}
+
 // Wait for button click to start the game
 startButton.addEventListener("click", startGame);
 resetButton.addEventListener("click", resetGame);
+
+// Update difficulty when selector changes
+difficultySelector.addEventListener("change", (event) => {
+  if (!gameRunning) {
+    currentDifficulty = event.target.value;
+    updateDifficultySettings();
+  }
+});
 
 function updateDropDistance() {
   const distance = gameContainer.offsetHeight + 30;
@@ -47,20 +112,26 @@ function startGame() {
   // Prevent multiple games from running at once
   if (gameRunning) return;
 
+  // Apply difficulty settings
+  updateDifficultySettings();
+  
   gameRunning = true;
   score = 0;
-  timeLeft = 30;
+  timeLeft = GAME_DURATION;
+  livesLeft = MAX_LIVES;
   lastDropSize = null;
   scoreElement.textContent = score;
   timeElement.textContent = timeLeft;
-  statusMessage.textContent = "Collect clean drops and avoid obstacles!";
+  renderLives();
+  statusMessage.textContent = `Catch ${WINNING_SCORE} drops to win! Difficulty: ${currentDifficulty.toUpperCase()}`;
   startButton.disabled = true;
+  difficultySelector.disabled = true;
 
   gameContainer.querySelectorAll(".water-drop, .float-points, .confetti-piece").forEach((el) => el.remove());
   updateDropDistance();
 
   // Create new drops frequently to keep the game active
-  dropMaker = setInterval(createDrop, 700);
+  dropMaker = setInterval(createDrop, DROP_INTERVAL);
 
   gameTimer = setInterval(() => {
     timeLeft -= 1;
@@ -114,12 +185,20 @@ function createDrop() {
     void scoreElement.offsetWidth;
     scoreElement.classList.add("score-pop", points > 0 ? "score-good" : "score-bad");
 
+    if (isObstacle) {
+      loseLife("An obstacle drained your water reserve.");
+    } else if (isBadDrop) {
+      loseLife("Dirty water reduced your reserve.");
+    }
+
     showFloatingPoints(event.clientX, event.clientY, points);
     drop.remove();
   });
 
   // Remove drops that reach the bottom (weren't clicked)
   drop.addEventListener("animationend", () => {
+    if (!gameRunning) return;
+
     drop.remove(); // Clean up drops that weren't caught
   });
 }
@@ -158,12 +237,13 @@ function getRandomMessage(messageArray) {
   return messageArray[randomIndex];
 }
 
-function endGame() {
+function endGame(reason) {
   gameRunning = false;
   clearInterval(dropMaker);
   clearInterval(gameTimer);
 
   startButton.disabled = false;
+  difficultySelector.disabled = false;
   startButton.textContent = "Play Again";
 
   const isWinner = score >= WINNING_SCORE;
@@ -171,7 +251,11 @@ function endGame() {
     ? getRandomMessage(winningMessages)
     : getRandomMessage(losingMessages);
 
-  statusMessage.textContent = `Time's up! Final score: ${score}. ${selectedMessage}`;
+  const endingPrefix = reason
+    ? `${reason} Final score: ${score}.`
+    : `Time's up! Final score: ${score}.`;
+
+  statusMessage.textContent = `${endingPrefix} ${selectedMessage}`;
 
   if (isWinner) {
     launchConfettiBurst();
@@ -184,12 +268,15 @@ function resetGame() {
   clearInterval(gameTimer);
 
   score = 0;
-  timeLeft = 30;
+  timeLeft = GAME_DURATION;
+  livesLeft = MAX_LIVES;
   scoreElement.textContent = score;
   timeElement.textContent = timeLeft;
+  renderLives();
   scoreElement.classList.remove("score-pop", "score-good", "score-bad");
 
   startButton.disabled = false;
+  difficultySelector.disabled = false;
   startButton.textContent = "Start Game";
   statusMessage.textContent = "Game reset. Press Start Game when you're ready!";
 
@@ -228,3 +315,8 @@ function launchConfettiBurst() {
 
 window.addEventListener("resize", updateDropDistance);
 updateDropDistance();
+
+// Initialize with default difficulty
+updateDifficultySettings();
+renderLives();
+

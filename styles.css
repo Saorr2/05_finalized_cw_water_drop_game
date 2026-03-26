@@ -36,13 +36,14 @@ Fonts:
 
 body {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
     min-height: 100vh;
     min-height: 100dvh;
     padding: 16px;
     background: linear-gradient(145deg, #e9f6ff 0%, #fff9de 100%);
-    font-family: Avenir, "Proxima Nova", "Trebuchet MS", sans-serif;
+    font-family: "Proxima Nova", Montserrat, Avenir, "Trebuchet MS", sans-serif;
 }
 
 .game-wrapper {
@@ -51,6 +52,7 @@ body {
     align-items: center;
     gap: 20px;
     width: min(96vw, 800px);
+    margin-bottom: 0;
 }
 
 .brand-header {
@@ -65,6 +67,55 @@ body {
     width: clamp(110px, 16vw, 150px);
     height: auto;
     object-fit: contain;
+}
+
+.difficulty-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 35%;
+    padding: 10px;
+    background: linear-gradient(90deg, #ffffff 0%, #fff5c8 100%);
+    border: 2px solid var(--cw-blue);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-right: auto;
+}
+
+.difficulty-selector label {
+    font-weight: 600;
+    color: var(--cw-text);
+    font-size: clamp(15px, 2.2vw, 16px);
+}
+
+.difficulty-selector select {
+    padding: 6px 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    border: 2px solid var(--cw-blue);
+    background-color: #ffffff;
+    color: var(--cw-text);
+    font-size: clamp(14px, 2vw, 16px);
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: "Proxima Nova", Montserrat, Avenir, "Trebuchet MS", sans-serif;
+}
+
+.difficulty-selector select:hover {
+    box-shadow: 0 0 0 3px rgba(46, 157, 247, 0.2);
+}
+
+.difficulty-selector select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(46, 157, 247, 0.3);
+    border-color: var(--cw-yellow);
+}
+
+.difficulty-selector select:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
 }
 
 .score-panel {
@@ -86,6 +137,37 @@ body {
     font-weight: bold;
 }
 
+.lives {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 700;
+    color: var(--cw-text);
+}
+
+#lives-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+}
+
+.life-drop {
+    width: 16px;
+    height: 22px;
+    background: radial-gradient(circle at 35% 30%, #d5f3ef 0%, #2e9df7 62%, #1773bf 100%);
+    border-radius: 50% 50% 55% 55% / 65% 65% 35% 35%;
+    transform: rotate(180deg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.life-drop-lost {
+    opacity: 0;
+    transform: rotate(180deg) translateY(8px) scale(0.6);
+    transition: transform 0.16s ease, opacity 0.16s ease;
+}
+
 #game-container {
     width: 100%;
     height: clamp(360px, 68vh, 600px);
@@ -94,7 +176,7 @@ body {
         radial-gradient(circle at 85% 75%, rgba(46, 157, 247, 0.2), transparent 42%),
         #f4fbff;
     border: 3px solid var(--cw-blue);
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 0 5px rgba(255, 201, 7, 0.25);
@@ -276,6 +358,59 @@ body {
     }
 }
 
+.game-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 0;
+    padding: 16px 20px;
+    background:
+        radial-gradient(circle at 18% 30%, rgba(255, 201, 7, 0.13), transparent 52%),
+        radial-gradient(circle at 82% 68%, rgba(46, 157, 247, 0.24), transparent 48%),
+        linear-gradient(180deg, #eef8ff 0%, #f7fdff 100%);
+    border: 3px solid var(--cw-blue);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: none;
+    width: min(96vw, 800px);
+    text-align: center;
+}
+
+.footer-logo {
+    width: clamp(80px, 12vw, 120px);
+    height: auto;
+    object-fit: contain;
+}
+
+.footer-links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    color: var(--cw-blue);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: clamp(13px, 1.8vw, 15px);
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.footer-links a:hover {
+    background-color: rgba(46, 157, 247, 0.1);
+    transform: translateY(-2px);
+}
+
+.footer-link:hover img {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
 @media (max-width: 850px) {
     .game-wrapper {
         width: 95vw;
@@ -291,6 +426,11 @@ body {
         width: clamp(120px, 42vw, 170px);
     }
 
+    .difficulty-selector {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
     .game-title {
         font-size: clamp(32px, 8vw, 42px);
     }
@@ -304,6 +444,10 @@ body {
     .score,
     .timer {
         font-size: 20px;
+    }
+
+    .lives {
+        font-size: 18px;
     }
 
     #game-container {
@@ -322,11 +466,41 @@ body {
         gap: 14px;
     }
 
+    .difficulty-selector {
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .difficulty-selector label {
+        font-size: 14px;
+    }
+
+    .difficulty-selector select {
+        font-size: 14px;
+        padding: 5px 8px;
+    }
+
+    .game-footer {
+        width: 100%;
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .footer-links {
+        gap: 8px;
+    }
+
+    .footer-links a {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
     .score-panel {
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
             "score timer"
+            "lives lives"
             "start reset";
         width: 100%;
         padding: 10px;
@@ -344,6 +518,11 @@ body {
         grid-area: timer;
         justify-self: center;
         text-align: center;
+    }
+
+    .lives {
+        grid-area: lives;
+        justify-self: center;
     }
 
     #start-btn {
@@ -384,6 +563,31 @@ body {
         margin-bottom: 10px;
     }
 
+    .difficulty-selector {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .difficulty-selector label {
+        font-size: 13px;
+    }
+
+    .difficulty-selector select {
+        width: 100%;
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .lives {
+        font-size: 16px;
+    }
+
+    .life-drop {
+        width: 14px;
+        height: 20px;
+    }
+
     #game-container {
         height: min(56vh, 420px);
         border-width: 2px;
@@ -392,5 +596,25 @@ body {
 
     .float-points {
         font-size: 18px;
+    }
+
+    .game-footer {
+        width: 100%;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .footer-logo {
+        width: clamp(70px, 40vw, 100px);
+    }
+
+    .footer-links {
+        gap: 6px;
+        row-gap: 6px;
+    }
+
+    .footer-links a {
+        font-size: 12px;
+        padding: 4px 8px;
     }
 }
